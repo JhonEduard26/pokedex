@@ -24,14 +24,7 @@ export class PokemonService {
       const pokemon = await this.pokemonModel.create(createPokemonDto);
       return pokemon;
     } catch (error) {
-      if (error.code === 11000) {
-        throw new BadRequestException(
-          `Pokemon already exists: ${JSON.stringify(error.keyValue)}`,
-        );
-      }
-      console.log(error);
-
-      throw new InternalServerErrorException('Error creating pokemon');
+      this.handleExceptions(error);
     }
   }
 
@@ -71,22 +64,25 @@ export class PokemonService {
 
       return { ...pokemon.toJSON(), ...updatePokemonDto };
     } catch (error) {
-      if (error.code === 11000) {
-        throw new BadRequestException(
-          `Pokemon already exists: ${JSON.stringify(error.keyValue)}`,
-        );
-      }
-
-      console.log(error);
-      throw new InternalServerErrorException('Error updating pokemon');
+      this.handleExceptions(error);
     }
   }
 
   async remove(id: string) {
-    const pokemon = await this.findOne(id);
+    const { deletedCount } = await this.pokemonModel.deleteOne({ _id: id });
+    if (deletedCount === 0) {
+      throw new NotFoundException(`Pokemon with id ${id} not found`);
+    }
+    return `Pokemon with id: ${id} deleted`;
+  }
 
-    await pokemon.deleteOne();
-
-    return `Pokemon ${pokemon.name} deleted`;
+  private handleExceptions(error: any) {
+    if (error.code === 11000) {
+      throw new BadRequestException(
+        `Pokemon already exists: ${JSON.stringify(error.keyValue)}`,
+      );
+    }
+    console.log(error);
+    throw new InternalServerErrorException('Error updating pokemon');
   }
 }
