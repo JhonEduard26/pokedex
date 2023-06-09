@@ -30,7 +30,12 @@ export class PokemonService {
   }
 
   findAll({ limit = 20, offset = 0 }: PaginationDto) {
-    return this.pokemonModel.find().limit(limit).skip(offset).exec();
+    return this.pokemonModel
+      .find()
+      .limit(limit)
+      .skip(offset)
+      .select('-__v')
+      .exec();
   }
 
   async findOne(id: string) {
