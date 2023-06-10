@@ -2,9 +2,11 @@
 /dist
 /node_modules
 /mongo
+Dfile
 
 # Enviroment variables
 .env
+.env.prod
 
 # Logs
 logs
